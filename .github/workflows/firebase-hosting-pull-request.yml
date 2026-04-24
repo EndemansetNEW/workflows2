@@ -7,13 +7,26 @@ permissions:
   checks: write
   contents: read
   pull-requests: write
+
 jobs:
   build_and_preview:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm ci && npm run build
+
+      # Setup pnpm
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      # Install dependencies using pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Build your project
+      - run: pnpm run build
+
+      # Deploy preview to Firebase Hosting
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
